@@ -1,4 +1,5 @@
 import 'package:f1_2021_udp/f1_2021_udp.dart';
+import 'package:syncfusion_flutter_gauges/gauges.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +27,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
     parseFiaFlags(-1);
 
     // add 14 empty colors for the leds
-    for (var i = 0; i < 14; i++) {
+    for (var i = 0; i < 15; i++) {
       revLed.add(Color(0xFF2E2E2E));
     }
 
@@ -41,20 +42,23 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
     // Car Telemetry
     listener.packetCarTelemetryDataStream.listen((packet) {
-      print(packet.m_carTelemetryData[0].toString());
+      //print(packet.m_carTelemetryData[0].toString());
 
-      parseGear(packet.m_carTelemetryData[0].m_gear);
-      parseRev(packet.m_carTelemetryData[0].m_revLightsPercent);
-      drsOn = packet.m_carTelemetryData[0].m_drs == 1;
+      setState(() {
+        parseGear(packet.m_carTelemetryData[0].m_gear);
+        parseRev(packet.m_carTelemetryData[0].m_revLightsPercent);
+        drsOn = packet.m_carTelemetryData[0].m_drs == 1;
+      });
     });
 
     // Car Status
     listener.packetCarStatusDataStream.listen((packet) {
       //print(packet.m_carStatusData[0].toString());
-
-      drsAvail = packet.m_carStatusData[0].m_drsAllowed == 1;
-      pitLimit = packet.m_carStatusData[0].m_pitLimiterStatus == 1;
-      parseFiaFlags(packet.m_carStatusData[0].m_vehicleFiaFlags);
+      setState(() {
+        drsAvail = packet.m_carStatusData[0].m_drsAllowed == 1;
+        pitLimit = packet.m_carStatusData[0].m_pitLimiterStatus == 1;
+        parseFiaFlags(packet.m_carStatusData[0].m_vehicleFiaFlags);
+      });
     });
   }
 
@@ -73,13 +77,13 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   }
 
   void parseRev(int revPercent) {
-    int leds = 14 ~/ (revPercent / 100);
+    int leds = (15 * (revPercent / 100)).toInt();
 
-    for (var i = 0; i < 14; i++) {
+    for (var i = 0; i < 15; i++) {
       if (i < leds) {
-        if (i < 6) {
+        if (i <= 4) {
           revLed[i] = FlutterFlowTheme.of(context).green;
-        } else if (i > 5 && i < 11) {
+        } else if (i >= 5 && i <= 9) {
           revLed[i] = FlutterFlowTheme.of(context).redd;
         } else {
           revLed[i] = FlutterFlowTheme.of(context).purple;
@@ -239,6 +243,14 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         shape: BoxShape.circle,
                       ),
                     ),
+                    Container(
+                      width: 30,
+                      height: 30,
+                      decoration: BoxDecoration(
+                        color: revLed[14],
+                        shape: BoxShape.circle,
+                      ),
+                    ),
                   ],
                 ),
                 Expanded(
@@ -360,7 +372,12 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                         children: [
                           Row(
                             mainAxisSize: MainAxisSize.max,
-                            children: [],
+                            children: [
+                              SfLinearGauge(
+                                orientation: LinearGaugeOrientation.vertical,
+                                animationDuration: 50,
+                              ),
+                            ],
                           ),
                         ],
                       ),
