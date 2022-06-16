@@ -1,7 +1,6 @@
 import 'package:f1_2021_udp/f1_2021_udp.dart';
 import '../flutter_flow/flutter_flow_theme.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class HomePageWidget extends StatefulWidget {
   const HomePageWidget({Key key}) : super(key: key);
@@ -19,7 +18,10 @@ class _HomePageWidgetState extends State<HomePageWidget> {
   Color flagColor;
   List<Color> revLed = [];
 
-  void init() {
+  @override
+  void initState() {
+    super.initState();
+
     // init values
     parseFiaFlags(-1);
 
@@ -28,12 +30,18 @@ class _HomePageWidgetState extends State<HomePageWidget> {
       revLed.add(Color(0xFF2E2E2E));
     }
 
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      listen();
+    });
+  }
+
+  void listen() async {
     F12021TelemetryListener listener = F12021TelemetryListener(20777);
     listener.start();
 
     // Car Telemetry
     listener.packetCarTelemetryDataStream.listen((packet) {
-      //print(packet.m_carTelemetryData[0].toString());
+      print(packet.m_carTelemetryData[0].toString());
 
       parseGear(packet.m_carTelemetryData[0].m_gear);
       parseRev(packet.m_carTelemetryData[0].m_revLightsPercent);
@@ -103,7 +111,6 @@ class _HomePageWidgetState extends State<HomePageWidget> {
 
   @override
   Widget build(BuildContext context) {
-    init();
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: FlutterFlowTheme.of(context).primaryBackground,
@@ -341,7 +348,7 @@ class _HomePageWidgetState extends State<HomePageWidget> {
                               style: FlutterFlowTheme.of(context).title1.override(
                                     fontFamily: 'Open Sans',
                                     color: FlutterFlowTheme.of(context).yellow,
-                                    fontSize: 300,
+                                    fontSize: 200,
                                     fontWeight: FontWeight.bold,
                                   ),
                             ),
